@@ -9,11 +9,12 @@ require('laravel-elixir-vue-2');
  |
  | Elixir provides a clean, fluent API for defining some basic Gulp tasks
  | for your Laravel application. By default, we are compiling the Sass
- | file for your application as well as publishing vendor resources.
+ | file for our application, as well as publishing vendor resources.
  |
  */
 
-elixir((mix) => {
+elixir(mix => {
     mix.sass('app.scss')
+       .copy('node_modules/bootstrap-sass/assets/fonts', 'public/fonts')
        .webpack('app.js');
 });
