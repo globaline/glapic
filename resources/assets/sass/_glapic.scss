@@ -1,0 +1,96 @@
+/* Ghost Buttons */
+
+.btn-ghost {
+  background: transparent;
+}
+
+.btn-ghost.btn-default {
+  color: #adadad;
+}
+
+.btn-ghost.btn-primary {
+  color: #337ab7;
+}
+
+.btn-ghost.btn-success {
+  color: #5cb85c;
+}
+
+.btn-ghost.btn-info {
+  color: #5bc0de;
+}
+
+.btn-ghost.btn-warning {
+  color: #f0ad4e;
+}
+
+.btn-ghost.btn-danger {
+  color: #d9534f;
+}
+
+.btn-ghost.btn-primary:hover,
+.btn-ghost.btn-success:hover,
+.btn-ghost.btn-info:hover,
+.btn-ghost.btn-warning:hover,
+.btn-ghost.btn-danger:hover {
+  color: #fff;
+}
+
+
+/* Album Thumbnail */
+.thumbnail.trim-horizontal,
+.thumbnail.trim-vertical,
+.thumbnail.trim-center,
+.thumbnail.resize {
+  overflow: hidden;
+  width: 200px;/* トリミングしたい枠の幅 */
+  height: 200px;/* トリミングしたい枠の高さ */
+  position: relative;
+}
+
+.thumbnail.trim-vertical img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  width: auto;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.thumbnail.trim-vertical img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.thumbnail.trim-center img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+}
+
+.thumbnail.resize {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}

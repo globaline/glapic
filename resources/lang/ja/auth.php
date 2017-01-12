@@ -13,13 +13,14 @@ return [
     |
     */
 
-    'failed' => 'These credentials do not match our records.',
-    'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
+    'failed' => '認証に失敗しました',
+    'throttle' => 'ログイン試行回数の上限に達しました。 :seconds秒後にもう一度お試しください。',
 
-    'login' => 'Login',
-    'logout' => 'Logout',
-    'email' => 'E-Mail Address',
-    'password' => 'Password',
-    'remember' => 'Remember Me',
-    'register' => 'Register'
+    'login' => 'ログイン',
+    'logout' => 'ログアウト',
+    'email' => 'メールアドレス',
+    'password' => 'パスワード',
+    'remember' => 'ログイン情報を記憶する',
+    'register' => '新規ユーザーを追加'
+
 ];
