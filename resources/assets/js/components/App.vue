@@ -2,11 +2,11 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-2">
-                <category></category>
+                <category @set="setCategory" :current="category"></category>
             </div>
             <div class="col-lg-10">
-                <album></album>
-                <picture></picture>
+                <album @set="setAlbum" :category="category" :current="album"></album>
+                <picture :album="album"></picture>
             </div>
         </div>
     </div>
@@ -20,8 +20,8 @@
     export default{
         data: () => {
             return{
-                categories: {},
-                albums: {},
+                category: null,
+                album: null,
             }
         },
         components:{
@@ -30,11 +30,15 @@
             'picture': PictureComponent
         },
         methods: {
-            fetchCategories: () => {
-                this.$http.get('/api/category').then((response) => {
-
-                });
+            setCategory(id) {
+                this.$set(this, 'category', id);
+            },
+            setAlbum(id) {
+                this.$set(this, 'album', id);
+            },
+            alert(message) {
+                alert(message);
             }
-        }
+        },
     }
 </script>

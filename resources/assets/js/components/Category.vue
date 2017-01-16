@@ -13,8 +13,8 @@
             </div>
         </div>
         <div class="list-group">
-            <button v-for="category in parsedCategories" type="button" class="list-group-item"
-                    v-bind:class="{ active : category.active }" v-on:click="setCategory(category.id)">
+            <button v-for="category in categories" type="button" class="list-group-item"
+                    v-bind:class="{ active : isCurrent(category.id) }" v-on:click="setCategory(category.id)">
                 {{ category.name }}<span class="badge">{{ category.album_count }}</span>
             </button>
         </div>
@@ -27,36 +27,27 @@
 
 <script>
     export default {
-        props: ['category'],
+        props: ['current'],
         data() {
             return {
                 categories : {}
             }
         },
-        computed: {
-            parsedCategories: function() {
-                var categories = this.categories;
-                var current = this.$root.$data.category;
-                Object.keys(categories).map(function(key, index){
-                    categories[key].active = categories[key].id == current;
-                });
-                return this.$data.categories;
-            }
-        },
-        created: function(){
+        mounted() {
             this.fetchCategories();
         },
         methods: {
             fetchCategories() {
-                var self = this;
-                $.get('api/category').then(function(categories){
-                    self.categories = JSON.parse(categories);
+                this.$http.get('api/category')
+                .then(response => {
+                    this.categories = JSON.parse(response.data);
                 });
             },
             setCategory(id) {
-                alert('hey');
-                this.$root.$data.category = id;
-                console.log(id);
+                this.$emit('set', id);
+            },
+            isCurrent(id) {
+                return this.current == id;
             }
         }
     }

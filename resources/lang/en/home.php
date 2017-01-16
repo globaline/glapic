@@ -9,5 +9,8 @@ return [
     'edit' => 'Edit',
     'upload' => 'Upload',
     'no_album' => 'Please select category',
-    'no_picture' => 'Please select album'
+    'no_picture' => 'Please select album',
+    'cancel' => 'Cancel',
+    'update' => 'Update',
+    'file_name' => 'File Name'
 ];

@@ -30,7 +30,7 @@
                 $('#uploadModal').modal('show');
             },
             request(file, xhr, formData) {
-                formData.append('album', 2);
+                formData.append('album', this.album);
             },
             cancel() {
             },
@@ -38,7 +38,7 @@
                 this.$refs.uploadDropzone.processQueue();
             },
             success() {
-                console.log('success');
+                this.$emit('success');
             }
         },
         mounted() {
