@@ -7,11 +7,16 @@
                     <h4 class="modal-title" id="uploadModalLabel">画像ファイルのアップロード</h4>
                 </div>
                 <div class="modal-body">
-                    <drop-zone url="/api/picture" id="dropzone" ref="uploadDropzone" :autoProcessQueue="false" @vdropzone-success="success()"></drop-zone>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" @click="cancel()">キャンセル</button>
+                    <button type="button" class="btn btn-success" @click="upload()">アップロード</button>
+                    <br>
+                    <div v-if="!!message" class="alert alert-success">
+                        {{ message }}
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" @click="cancel()">キャンセル</button>
-                    <button type="button" class="btn btn-success" @click="upload()">完了</button>
+                    <drop-zone url="/api/picture" id="dropzone" ref="uploadDropzone" :showRemoveLink="false" :maxNumberOfFiles="50" :maxFileSizeInMB="4"
+                               :autoProcessQueue="false" @vdropzone-success="nextUpload" @vdropzone-fileAdded="addFile"></drop-zone>
                 </div>
             </div>
         </div>
@@ -21,7 +26,14 @@
 <script>
     import Dropzone from 'vue2-dropzone'
     export default{
-        props: ['album'],
+        props: ['album', 'clearWhenCancel'],
+        data(){
+            return {
+                message: "",
+                files: {},
+                numberOfUploaded: 0
+            }
+        },
         components:{
             'drop-zone': Dropzone
         },
@@ -33,19 +45,38 @@
                 formData.append('album', this.album);
             },
             cancel() {
+                this.$emit('cancel');
+                if (this.clearWhenCancel) this.clear();
             },
             upload(){
+                this.numberOfUploaded = Object.keys(this.files).length;
                 this.$refs.uploadDropzone.processQueue();
             },
-            success() {
-                this.$emit('success');
+            addFile(file) {
+                this.$set(this.files, file.name, file);
+            },
+            nextUpload(file, response) {
+                this.$delete(this.files, file.name);
+                var file_count = Object.keys(this.files).length;
+
+                if(file_count != 0) {
+                    this.$emit('success');
+                    this.upload();
+                } else {
+                    this.message = this.numberOfUploaded + '個のファイルをアップロードしました。';
+                    this.$emit('success-all');
+                }
+            },
+            clear(){
+                this.$refs.uploadDropzone.removeAllFiles();
+                this.this.numberOfUploaded = 0;
+                this.message = "";
             }
         },
         mounted() {
             // 何故かイベントリスナーが登録されてなかった・・・
-            var that = this;
-            dropzone.dropzone.on('sending', function(e, i, n){
-                that.request(e, i, n);
+            dropzone.dropzone.on('sending', (e, i, n) => {
+                this.request(e, i, n);
             });
         }
     }

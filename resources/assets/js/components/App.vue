@@ -20,8 +20,8 @@
     export default{
         data: () => {
             return{
-                category: null,
-                album: null,
+                category: {},
+                album: {},
             }
         },
         components:{
@@ -30,11 +30,11 @@
             'picture': PictureComponent
         },
         methods: {
-            setCategory(id) {
-                this.$set(this, 'category', id);
+            setCategory(category) {
+                this.$set(this, 'category', category);
             },
-            setAlbum(id) {
-                this.$set(this, 'album', id);
+            setAlbum(album) {
+                this.$set(this, 'album', album);
             },
             alert(message) {
                 alert(message);

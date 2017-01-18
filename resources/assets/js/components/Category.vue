@@ -13,8 +13,8 @@
             </div>
         </div>
         <div class="list-group">
-            <button v-for="category in categories" type="button" class="list-group-item"
-                    v-bind:class="{ active : isCurrent(category.id) }" v-on:click="setCategory(category.id)">
+            <button v-for="(category, index) in categories" type="button" class="list-group-item"
+                    v-bind:class="{ active : isCurrent(category.id) }" v-on:click="setCategory(index)">
                 {{ category.name }}<span class="badge">{{ category.album_count }}</span>
             </button>
         </div>
@@ -43,11 +43,12 @@
                     this.categories = JSON.parse(response.data);
                 });
             },
-            setCategory(id) {
-                this.$emit('set', id);
+            setCategory(index) {
+                var category = this.categories[index];
+                this.$emit('set', category);
             },
             isCurrent(id) {
-                return this.current == id;
+                return this.current.id == id;
             }
         }
     }

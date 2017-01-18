@@ -5,7 +5,7 @@
                 <div class="col-xs-6">{{ trans('home.albums') }}</div>
                 <div class="col-xs-6 text-right">
                     <button type="button" class="btn btn-xs btn-default btn-ghost" name="add_album"
-                            @click="newAlbum" :disabled="category == null">
+                            @click="newAlbum" :disabled="categorySelected">
                         <i class="glyphicon glyphicon-plus"></i>
                     </button>
                 </div>
@@ -13,14 +13,14 @@
         </div>
         <div class="panel-body">
             <div class="row">
-                <div v-if="category == null" class="col-md-12">
+                <div v-if="categorySelected" class="col-md-12">
                     {{ trans('home.no_album') }}
                 </div>
-                <template v-else>
-                <div v-for="album in albums" class="col-xs-6 col-sm-4 col-md-2">
+　              <template v-else>
+                <div v-for="(album, index) in albums" class="col-xs-6 col-sm-4 col-md-2">
                     <a class="thumbnail" :class="{ active: isCurrent(album.id) }"
-                       @click="setAlbum(album.id)" style="cursor: pointer">
-                        <img :src="album.thumbnail" :alt="album.name">
+                       @click="setAlbum(index)" style="cursor: pointer">
+                        <img v-if="!!album.thumbnail" :src="album.thumbnail" :alt="album.name">
                         <div class="caption">
                             {{ album.name }}
                         </div>
@@ -57,9 +57,14 @@
                 modal: {
                     add: {
                         name: "",
-                        category_id: this.category,
+                        category_id: this.category.id,
                     }
                 }
+            }
+        },
+        computed: {
+            categorySelected: function() {
+                return !Object.keys(this.category).length;
             }
         },
         watch: {
@@ -72,26 +77,26 @@
         },
         methods: {
             fetchAlbums() {
-                this.$http.get('api/album?category=' + this.category)
+                this.$http.get('api/album?category=' + this.category.id)
                 .then(response => {
                     this.albums = JSON.parse(response.data);
                 });
             },
-            setAlbum(id) {
-                this.$emit('set', id);
+            setAlbum(index) {
+                var album = this.albums[index];
+                this.$emit('set', album);
             },
             isCurrent(id) {
-                return this.current == id;
+                return this.current.id == id;
             },
             newAlbum() {
                 this.modal.add = {
                         name: "",
-                        category_id: this.category,
+                        category_id: this.category.id,
                 };
                 this.$refs.addNewAlbumModal.show();
             },
             store() {
-                console.log(this.modal.add);
                 this.$http.post('api/album', this.modal.add)
                 .then(response => {
                     this.fetchAlbums();

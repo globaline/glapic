@@ -5,7 +5,7 @@
                 <div class="row">
                     <div class="col-md-6">{{ trans('home.pictures')  }}</div>
                     <div class="col-xs-6 text-right">
-                        <button type="button" class="btn btn-xs btn-default btn-ghost" @click="showUploader" :disabled="album==null">
+                        <button type="button" class="btn btn-xs btn-default btn-ghost" @click="showUploader" :disabled="albumSelected">
                             <i class="glyphicon glyphicon-plus"></i>
                         </button>
                     </div>
@@ -13,8 +13,11 @@
             </div>
             <div class="panel-body">
                 <div class="row">
-                    <div v-if="album==null" class="col-md-12">
+                    <div v-if="albumSelected" class="col-md-12">
                         {{ trans('home.no_picture') }}
+                    </div>
+                    <div v-else-if="hasPicture" class="col-md-12">
+                        {{ album.name }}にはまだ写真が追加されていません。
                     </div>
                     <template v-else>
                         <div v-for="(picture, index) in pictures" class="col-xs-12 col-sm-6 col-md-3">
@@ -68,7 +71,7 @@
             </div>
         </modal>
 
-        <uploader ref="uploader" :album="album" @success="uploaded"></uploader>
+        <uploader ref="uploader" :album="album.id" :clearWhenCancel="true" @success="uploaded"></uploader>
     </div>
 </template>
 
@@ -95,6 +98,15 @@
                 }
             }
         },
+        computed: {
+            albumSelected: function(){
+                return !Object.keys(this.album).length;
+            },
+            hasPicture: function(){
+                return !Object.keys(this.pictures).length;
+            }
+        }
+        ,
         watch: {
             album() {
                 this.fetchPictures();
@@ -115,7 +127,7 @@
                 });
             },
             fetchPictures(){
-                this.$http.get('api/picture?album=' + this.album)
+                this.$http.get('api/picture?album=' + this.album.id)
                 .then(response => {
                     this.pictures = JSON.parse(response.data);
                     this.sort();
