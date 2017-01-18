@@ -73,7 +73,7 @@
 </template>
 
 <script>
-    import UploaderComponent from './uploader.vue'
+    import UploaderComponent from './Uploader.vue'
 
     export default {
         props: ['album'],

@@ -13,9 +13,9 @@
 </template>
 
 <script>
-    import CategoryComponent from './category.vue'
-    import AlbumComponent from './album.vue'
-    import PictureComponent from './picture.vue'
+    import CategoryComponent from './Category.vue'
+    import AlbumComponent from './Album.vue'
+    import PictureComponent from './Picture.vue'
 
     export default{
         data: () => {
