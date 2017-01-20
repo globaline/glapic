@@ -17,4 +17,8 @@ elixir(mix => {
     mix.sass('app.scss')
        .copy('node_modules/bootstrap-sass/assets/fonts', 'public/fonts')
        .webpack('app.js');
+
+    mix.browserSync({
+        proxy: 'http://glapic.app'
+    });
 });
