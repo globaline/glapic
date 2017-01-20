@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
 
             Picture::create([
                 'filename' => $file_info[2],
-                'storage_path' => 'images/'.implode('/', $file_info),
+                'storage_path' => '/images/'.implode('/', $file_info),
                 'album_id' => $album->id,
             ]);
         }

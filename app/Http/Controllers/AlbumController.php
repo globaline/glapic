@@ -29,7 +29,6 @@ class AlbumController extends Controller
 
     public function store(Request $request)
     {
-        \Debugbar::info($request->all());
         $this->album->fill($request->all())->save();
     }
 }
