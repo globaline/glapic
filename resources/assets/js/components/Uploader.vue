@@ -7,15 +7,13 @@
                     <h4 class="modal-title" id="uploadModalLabel">画像ファイルのアップロード</h4>
                 </div>
                 <div class="modal-body">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" @click="cancel()">キャンセル</button>
-                    <button type="button" class="btn btn-success" @click="upload()">アップロード</button>
-                    <br>
-                    <div v-if="!!message" class="alert alert-success">
+                    <button type="button" class="btn btn-success" @click="upload()" :disabled="!numberOfFiles">実行</button>
+                    <div v-if="!!message" class="alert alert-success" style="margin-top:10px;">
                         {{ message }}
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <drop-zone url="/api/picture" id="dropzone" ref="uploadDropzone" :showRemoveLink="false" :maxNumberOfFiles="50" :maxFileSizeInMB="4"
+                    <drop-zone url="/api/picture" id="dropzone" ref="uploadDropzone" :showRemoveLink="true" :maxNumberOfFiles="50" :maxFileSizeInMB="4"
                                :autoProcessQueue="false" @vdropzone-success="nextUpload" @vdropzone-fileAdded="addFile"></drop-zone>
                 </div>
             </div>
@@ -34,8 +32,13 @@
                 numberOfUploaded: 0
             }
         },
+        computed: {
+            numberOfFiles() {
+                return Object.keys(this.files).length
+            }
+        },
         components:{
-            'drop-zone': Dropzone
+            'drop-zone': Dropzone,
         },
         methods: {
             show() {
@@ -49,7 +52,7 @@
                 if (this.clearWhenCancel) this.clear();
             },
             upload(){
-                this.numberOfUploaded = Object.keys(this.files).length;
+                this.numberOfUploaded = this.numberOfFiles;
                 this.$refs.uploadDropzone.processQueue();
             },
             addFile(file) {
@@ -61,15 +64,16 @@
 
                 if(file_count != 0) {
                     this.$emit('success');
-                    this.upload();
+                    this.$refs.uploadDropzone.processQueue();
                 } else {
                     this.message = this.numberOfUploaded + '個のファイルをアップロードしました。';
                     this.$emit('success-all');
+                    this.$refs.uploadDropzone.removeAllFiles();
+                    this.$set(this, 'files', {});
+                    this.numberOfUploaded = 0;
                 }
             },
             clear(){
-                this.$refs.uploadDropzone.removeAllFiles();
-                this.this.numberOfUploaded = 0;
                 this.message = "";
             }
         },
