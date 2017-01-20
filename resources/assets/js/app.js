@@ -15,6 +15,7 @@ require('./bootstrap');
 
 Vue.component('app', require('./components/App.vue'));
 Vue.component('modal', require('./components/Modal.vue'));
+Vue.component('theta', require('./components/Theta.vue'));
 
 Vue.prototype.trans = (key) => {
     return _.get(window.trans, key, key);

@@ -11,6 +11,9 @@
 |
 */
 // Authentication Routes...
+use App\Picture;
+use Illuminate\Http\Request;
+
 Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('login', 'Auth\LoginController@login');
 Route::post('logout', 'Auth\LoginController@logout')->name('logout');
@@ -38,4 +41,8 @@ Route::resource('home', 'HomeController');
 
 Route::get('dropfile', function() {
     return view('dropfile');
+});
+
+Route::get('embed/theta', function() {
+    return view('embed.theta', compact('picture_path'));
 });
