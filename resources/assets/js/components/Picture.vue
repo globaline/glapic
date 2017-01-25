@@ -21,21 +21,21 @@
                         {{ album.name }}にはまだ写真が追加されていません。
                     </div>
                     <template v-else>
-                        <div v-for="(picture, index) in pictures" class="col-xs-12 col-sm-6 col-md-3">
+                        <div v-for="(picture, index) in pictures" class="col-xs-12 col-sm-6 col-md-3" style="cursor: pointer" @click="show(index)">
                             <div class="thumbnail">
-                                <img v-if="!!picture.thumbnail" :src="picture.thumbnail" :alt="picture.filename" @click='setPanorama(index)'>
+                                <img v-if="!!picture.thumbnail" :src="picture.thumbnail" :alt="picture.filename">
                                 <div class="caption">
                                     <p>{{ picture.filename }}</p>
                                     <div class="btn-group btn-group-justified" role="group" :aria-label="picture.id">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <button type="button" class="btn btn-danger" @click="confirmDestroy(index)">
+                                            <button type="button" class="btn btn-danger" @click.stop="confirmDestroy(index)">
                                                 <i class="glyphicon glyphicon-trash"></i>&nbsp;
                                                 {{ trans('home.delete') }}
                                             </button>
                                         </div>
                                         <div class="btn-group btn-group-sm" role="group">
                                             <button type="button" class="btn btn-primary"
-                                                @click="editPictureInfo(index)">
+                                                @click.stop="editPictureInfo(index)">
                                                 <i class="glyphicon glyphicon-edit"></i>&nbsp;
                                                 {{ trans('home.edit') }}
                                             </button>
@@ -48,13 +48,14 @@
                 </div>
             </div>
         </div>
+
         <modal id="deleteModal" :title="modal.delete.title" ref="deleteModal"
                @ok="destroy(modal.delete.currentIndex)" :okHide="true" okColor="danger" :okText="trans('home.delete')"
                 :cancelText="trans('home.cancel')">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2">
                     <div class="thumbnail">
-                        <img v-if="!!modal.delete.image" :src="modal.delete.image.storage_path" :alt="modal.delete.image.storage_path">
+                        <img v-if="!!modal.delete.image" :src="modal.delete.image.storage_path" :alt="modal.delete.image.filename">
                     </div>
 
                 </div>
@@ -76,6 +77,30 @@
                             <div class="input-group-addon">{{ modal.edit.extension }}</div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </modal>
+
+        <modal id="showModal" ref="showModal" size="lg" title=""
+            @ok="show(modal.show.currentIndex)" :okHide="true" okColor="primary" :okText="trans('home.close')" :cancelButton="false">
+            <div slot="header">
+                <div class="row">
+                    <div class="col-xs-8"><h4 class="modal-title">{{ modal.show.title }}</h4></div>
+                    <div class="col-xs-4 text-right">
+                        <button class="btn btn-ghost btn-default" :class="{active: modal.show.panorama.enable}"
+                            @click="togglePanorama()"><i class="glyphicon glyphicon-sunglasses"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div v-if="modal.show.panorama.loading" class="loader"></div>
+                    <div v-if="modal.show.panorama.enable" class="thumbnail" :style="[modal.show.panorama.style]" >
+                        <theta :src="modal.show.image.storage_path" :style="{position: 'absolute', top: 0, right: 0}" @loaded="modal.show.panorama.loading=false"></theta>
+                    </div>
+                    <a v-else-if="!modal.show.panorama.loading" class="thumbnail" :href="modal.show.image.storage_path">
+                        <img v-if="!!modal.show.image" :src="modal.show.image.storage_path" :alt="modal.show.image.filename">
+                    </a>
                 </div>
             </div>
         </modal>
@@ -148,6 +173,20 @@
                         currentIndex: null,
                         file_name: "",
                         extension: ""
+                    },
+                    show: {
+                        title: "",
+                        currentIndex: null,
+                        image: {},
+                        panorama: {
+                            enable: false,
+                            style: {
+                                height: 0,
+                                'padding-bottom': '56.25%',
+                                position: 'relative'
+                            },
+                            loading: false,
+                        }
                     }
                 },
                 loading: false,
@@ -158,7 +197,7 @@
                         width: 200,
                         height: 160
                     }
-                }
+                },
             }
         },
         computed: {
@@ -208,6 +247,20 @@
                     });
 
                 });
+            },
+            show(index) {
+                var picture = this.pictures[index];
+                this.modal.show.title = picture.filename;
+                this.modal.show.currentIndex = index;
+                this.modal.show.image = picture;
+                this.modal.show.panorama.enable = false;
+                this.$refs.showModal.show();
+            },
+            togglePanorama() {
+                this.modal.show.panorama.loading = !this.modal.show.panorama.enable;
+                setTimeout(() => {
+                    this.modal.show.panorama.enable = !this.modal.show.panorama.enable;
+                }, 30);
             },
             destroy(index) {
                 this.$http.delete('api/picture/' + this.pictures[index].id)
@@ -309,9 +362,6 @@
                 };
                 return img.src = picture.storage_path;
             },
-            setPanorama(index) {
-                $('iframe').attr('src', '/embed/theta?picture=' + this.pictures[index].id);
-            }
         },
         components:{
             'uploader': UploaderComponent

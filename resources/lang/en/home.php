@@ -12,5 +12,6 @@ return [
     'no_picture' => 'Please select album',
     'cancel' => 'Cancel',
     'update' => 'Update',
-    'file_name' => 'File Name'
+    'file_name' => 'File Name',
+    'close' => 'close'
 ];

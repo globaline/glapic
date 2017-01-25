@@ -1,5 +1,5 @@
 <template>
-    <div id="stage" :style="[stageSize]"></div>
+    <div id="stage" :style="[stageStyle]"></div>
 </template>
 
 <script>
@@ -9,23 +9,29 @@
     export default{
         props: {
             width: {
-                type: Number,
-                default: 800
+                type: String,
+                default: '100%'
             },
             height: {
-                type: Number,
-                default: 450
+                type: String,
+                default: '100%'
             },
             src: {
                 type: String,
                 default: ""
+            },
+            style: {
+                type: Object,
+                default: function(){
+                    return {};
+                }
             }
         },
         data(){
             return{
-                stageSize: {
-                    width: this.width,
-                    height: this.height
+                size: {
+                    width: null,
+                    height: null
                 },
                 scence: null,
                 geometry: null,
@@ -34,10 +40,47 @@
                 axis: null,
                 sphere: null,
                 renderer: null,
-                controls: null
+                controls: null,
             }
         },
+        computed: {
+            stageStyle() {
+                var baseStyle = {
+                    width: this.width,
+                    height: this.height,
+                    overflow: 'hidden',
+                };
+
+                return $.extend(baseStyle, this.style);
+            },
+        },
+        watch: {
+            width(newWidth) {
+                this.stageStyle.width = newWidth;
+                this.size.width = newWidth;
+            },
+            height(newHeight) {
+                this.stageStyle.width = newWidth;
+                this.size.height = newHeight;
+            },
+            size:{
+                handler: function() {
+                    this.resize();
+                },
+                deep: true
+            }
+        },
+        created: function () {
+            window.addEventListener('resize', this.handleResize);
+            this.$emit('beforeLoad');
+        },
+        beforeDestroy: function () {
+            window.removeEventListener('resize', this.handleResize);
+        },
         mounted() {
+            this.size.width=$('#stage').width();
+            this.size.height=$('#stage').height();
+
             //scene
 
             this.scene = new THREE.Scene();
@@ -56,40 +99,42 @@
 
             //camera
 
-            this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 1, 1000);
+            this.camera = new THREE.PerspectiveCamera(75, this.size.width / this.size.height, 1, 1000);
             this.camera.position.set(0,0,0.1);
             this.camera.lookAt(this.sphere.position);
 
             //render
 
             this.renderer = new THREE.WebGLRenderer();
-            this.renderer.setSize(this.width,this.height);
+            this.renderer.setSize(this.size.width,this.size.height);
             this.renderer.setClearColor({color: 0x000000});
             document.getElementById('stage').appendChild(this.renderer.domElement);
             this.renderer.render(this.scene, this.camera);
+            this.$emit('load-status', 90);
 
             //control
 
             this.controls = new OrbitControls(this.camera, this.renderer.domElement);
             this.controls.zoomSpeed = 3;
-
             this.render();
-        },
-        components:{
+            this.$emit('loaded');
+
         },
         methods: {
             render(){
                 requestAnimationFrame(this.render);
-                this.sphere.rotation.y += 0.05 * Math.PI/180;
-                //画面リサイズ対応
-                document.getElementById('stage').addEventListener( 'resize', this.resize, false );
+                // this.sphere.rotation.y += 0.05 * Math.PI/180;
                 this.renderer.render(this.scene, this.camera);
                 this.controls.update();
             },
             resize() {
-                this.camera.aspect = this.width / this.height;
+                this.camera.aspect = this.size.width / this.size.height;
                 this.camera.updateProjectionMatrix();
-                this.renderer.setSize( this.width, this.height );
+                this.renderer.setSize( this.size.width, this.size.height );
+            },
+            handleResize() {
+                this.size.width=$('#stage').width();
+                this.size.height=$('#stage').height();
             }
         }
     }

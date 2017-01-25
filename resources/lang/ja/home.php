@@ -12,5 +12,6 @@ return [
     'no_picture' => 'アルバムを選択して下さい',
     'cancel' => 'キャンセル',
     'update' => '更新',
-    'file_name' => 'ファイル名'
+    'file_name' => 'ファイル名',
+    'close' => '閉じる'
 ];
