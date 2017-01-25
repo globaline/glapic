@@ -10,7 +10,7 @@
                     <slot></slot>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn" @click="cancelCall" :class="[cancelButtonColor]">{{ cancelText }}</button>
+                    <button v-if="cancelButton" class="btn" @click="cancelCall" :class="[cancelButtonColor]">{{ cancelText }}</button>
                     <button class="btn" @click="okCall" :class="[okButtonColor]">{{ okText }}</button>
                 </div>
             </div>
@@ -43,6 +43,10 @@
             okHide: {
                 type: Boolean,
                 default: false
+            },
+            cancelButton: {
+                type: Boolean,
+                default: true
             },
             cancelText: {
                 type: String,
