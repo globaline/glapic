@@ -38,11 +38,3 @@ Route::get('images/{category}/{album}/{filename}', function ($category, $album, 
 });
 
 Route::resource('home', 'HomeController');
-
-Route::get('dropfile', function() {
-    return view('dropfile');
-});
-
-Route::get('embed/theta', function() {
-    return view('embed.theta', compact('picture_path'));
-});
