@@ -8,8 +8,8 @@
                         {{ trans('home.albums') }}<span v-if="albumSelected"> - {{ current.name }}</span>
                     </div>
                     <div class="col-xs-4 text-right">
-                        <button type="button" class="btn btn-xs btn-default btn-ghost visible-lg-inline-block" :class="{active: fix}" name="fix_panel"
-                                @click.stop="fixPanel">
+                        <button type="button" class="btn btn-xs btn-default btn-ghost visible-lg-inline-block" :class="{active: fixed}" name="fixed_panel"
+                                @click.stop="fixedPanel">
                             <i class="glyphicon glyphicon-pushpin"></i>
                         </button>
                         <button type="button" class="btn btn-xs btn-default btn-ghost" name="add_album"
@@ -26,19 +26,26 @@
                     </div>
     　              <template v-else>
                     <div v-for="(album, index) in albums" class="col-xs-6 col-sm-4 col-md-2">
-                        <a class="thumbnail" :class="{ active: isCurrent(album.id) }"
+                        <div v-if="edit" class="thumbnail">
+                            <img v-if="!!album.thumbnail" :src="album.thumbnail" :alt="album.name">
+                            <input class="form-control" type="text" v-model="album.name">
+                        </div>
+                        <a v-else class="thumbnail" :class="{ active: isCurrent(album.id) }"
                            @click="setAlbum(index)" style="cursor: pointer">
                             <img v-if="!!album.thumbnail" :src="album.thumbnail" :alt="album.name">
                             <div class="caption">
                                 <p>{{ album.name }}</p>
-　                          </div>
+                            </div>
                         </a>
                     </div>
                     </template>
                 </div>
             </div>
             <div class="panel-footer text-right" v-if="expand">
-                <button class="btn btn-default btn-ghost btn-sm" @click="setMode('edit')">{{ trans('home.edit') }}</button>
+                <button class="btn btn-default btn-ghost btn-sm" @click="toggleEditMode();">
+                    <template v-if="edit">完了</template>
+                    <template v-else>{{ trans('home.edit') }}</template>
+                </button>
             </div>
         </div>
         <modal id="addNewAlbumModal" title="アルバムの新規作成" ref="addNewAlbumModal"
@@ -57,23 +64,32 @@
 </template>
 
 <script>
+    import { SET_ALBUM, FETCH_ALBUMS } from '../vuex/mutation-types';
+
     export default {
-        props: ['category', 'current'],
         data() {
             return {
-                albums: {},
                 modal: {
                     add: {
                         name: "",
-                        category_id: this.category.id,
+                        category_id: null,
                     }
                 },
                 expand: true,
-                fix: false,
-                mode: 'default',
+                fixed: false,
+                edit: false,
             }
         },
         computed: {
+            albums() {
+                return this.$store.state.album.items;
+            },
+            current() {
+                return this.$store.getters.currentAlbum;
+            },
+            category() {
+                return this.$store.getters.currentCategory;
+            },
             categorySelected() {
                 return !!Object.keys(this.category).length;
             },
@@ -84,12 +100,11 @@
         watch: {
             category() {
                 this.fetchAlbums();
-                var album = {};
-                this.$emit('set', album);
+                this.setAlbum(null);
                 this.expandWindow(true);
             },
             expand() {
-                if (this.fix) this.expand = true;
+                if (this.fixed) this.expand = true;
             }
         },
         mounted() {
@@ -97,14 +112,10 @@
         },
         methods: {
             fetchAlbums() {
-                this.$http.get('api/album?category=' + this.category.id)
-                .then(response => {
-                    this.albums = JSON.parse(response.data);
-                });
+                this.$store.dispatch(FETCH_ALBUMS);
             },
             setAlbum(index) {
-                var album = this.albums[index];
-                this.$emit('set', album);
+                this.$store.dispatch(SET_ALBUM, index);
                 this.expandWindow(false);
             },
             isCurrent(id) {
@@ -129,12 +140,12 @@
             toggleWindow() {
                 this.expandWindow(!this.expand);
             },
-            fixPanel() {
-                this.fix = !this.fix;
-                if(this.fix) this.expand = true;
+            fixedPanel() {
+                this.fixed = !this.fixed;
+                if(this.fixed) this.expand = true;
             },
-            setMode(mode) {
-                this.mode = mode;
+            toggleEditMode() {
+                this.edit = !this.edit;
             }
         }
     }

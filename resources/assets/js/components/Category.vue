@@ -28,17 +28,23 @@
 </template>
 
 <script>
+    import { SET_CATEGORY, FETCH_CATEGORIES } from '../vuex/mutation-types';
+
     export default {
-        props: ['current'],
         data() {
             return {
-                categories : {},
                 expand :true
             }
         },
         computed: {
+            categories() {
+                return this.$store.state.category.items;
+            },
+            current() {
+                return this.$store.getters.currentCategory;
+            },
             categorySelected() {
-                return !!Object.keys(this.current).length;
+                return !!this.current;
             }
         },
         mounted() {
@@ -46,16 +52,13 @@
         },
         methods: {
             fetchCategories() {
-                this.$http.get('api/category')
-                .then(response => {
-                    this.categories = JSON.parse(response.data);
-                });
+                this.$store.dispatch(FETCH_CATEGORIES);
             },
             setCategory(index) {
-                var category = this.categories[index];
-                this.$emit('set', category);
+                this.$store.dispatch(SET_CATEGORY, index);
                 this.expandWindow(false);
             },
+
             expandWindow(expand) {
                 this.expand = expand;
             },

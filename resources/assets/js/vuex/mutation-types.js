@@ -1,0 +1,9 @@
+export const SET_ALBUM = 'SET_ALBUM';
+export const FETCH_ALBUMS = 'FETCH_ALBUMS';
+
+export const SET_CATEGORY = 'SET_CATEGORY';
+export const FETCH_CATEGORIES = 'FETCH_CATEGORIES';
+
+export const FETCH_PICTURES = 'FETCH_PICTURES';
+export const SET_THUMBNAILS = 'SET_THUMBNAILS';
+export const SET_PICTURE_LOADER = 'SET_PICTURE_LOADER';

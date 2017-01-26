@@ -13,6 +13,8 @@ require('./bootstrap');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+import store from './vuex/store'
+
 Vue.component('app', require('./components/App.vue'));
 Vue.component('modal', require('./components/Modal.vue'));
 Vue.component('theta', require('./components/Theta.vue'));
@@ -22,5 +24,6 @@ Vue.prototype.trans = (key) => {
 };
 
 const app = new Vue({
-    el: '#app'
+    el: '#app',
+    store
 });

@@ -23,7 +23,7 @@
                     <template v-else>
                         <div v-for="(picture, index) in pictures" class="col-xs-12 col-sm-6 col-md-3" style="cursor: pointer" @click="show(index)">
                             <div class="thumbnail">
-                                <img v-if="!!picture.thumbnail" :src="picture.thumbnail" :alt="picture.filename">
+                                <img v-if="!!thumbnails[index]" :src="thumbnails[index]" :alt="picture.filename">
                                 <div class="caption">
                                     <p>{{ picture.filename }}</p>
                                     <div class="btn-group btn-group-justified" role="group" :aria-label="picture.id">
@@ -154,13 +154,12 @@
 </style>
 
 <script>
-    import UploaderComponent from './Uploader.vue'
+    import UploaderComponent from './Uploader.vue';
+    import { FETCH_PICTURES } from '../vuex/mutation-types';
 
     export default {
-        props: ['album'],
         data() {
             return {
-                pictures: {},
                 modal: {
                     delete: {
                         title: "",
@@ -189,29 +188,32 @@
                         }
                     }
                 },
-                loading: false,
-                thumbnail: {
-                    queue: [],
-                    timeout: 3000,
-                    size: {
-                        width: 200,
-                        height: 160
-                    }
-                },
             }
         },
         computed: {
+            pictures() {
+                return this.$store.state.picture.items;
+            },
+            album() {
+                return this.$store.getters.currentAlbum;
+            },
+            thumbnails() {
+                return this.$store.state.picture.thumbnails;
+            },
+            loading: function(){
+                return this.$store.state.picture.loading;
+            },
             albumSelected: function(){
                 return !Object.keys(this.album).length;
             },
             hasPicture: function(){
                 return !Object.keys(this.pictures).length;
-            }
+            },
         },
         watch: {
             album() {
                 this.fetchPictures();
-            }
+            },
         },
         mounted() {
             this.fetchPictures();
@@ -232,21 +234,7 @@
                 });
             },
             fetchPictures(){
-                this.$http.get('api/picture?album=' + this.album.id)
-                .then(response => {
-                    this.loading = true;
-                    var pictures = JSON.parse(response.data);
-                    if (!pictures.length) {
-                        this.$set(this, 'pictures', {});
-                        return this.loading = false;
-                    }
-                    this.setThumbnails(pictures, (result) => {
-                        this.$set(this, 'pictures', result);
-                        this.sort();
-                        return this.loading = false;
-                    });
-
-                });
+                this.$store.dispatch(FETCH_PICTURES)
             },
             show(index) {
                 var picture = this.pictures[index];
@@ -308,7 +296,7 @@
             uploaded() {
                 this.fetchPictures();
             },
-            setThumbnails(pictures, callback) {
+/*            setThumbnails(pictures, callback) {
                 var queue, setCount, thisQueue;
 
                 queue = this.thumbnail.queue;
@@ -321,7 +309,8 @@
                 thisQueue = queue[queue.length-1];
 
                 pictures.map((picture, index) => {
-                    this.createThumbnail(pictures[index], function(){
+                    this.createThumbnail(pictures[index], (thumbnail) => {
+                        this.$set(this.thumbnails, index, thumbnail);
                         setCount++;
                         if (setCount == pictures.length && callback != null && thisQueue.isCurrent) {
                             return callback(pictures);
@@ -338,7 +327,8 @@
                     console.error('[createThumbnail] Failed to load ' + picture.filename);
                     picture.error = true;
                     img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMTYwIj48ZGVmcz48c3R5bGU+LmNscy0xe2ZpbGw6I2ZmZjt9LmNscy0ye2ZpbGw6I2E5NDQ0Mjt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPuOCouOCu+ODg+ODiCAxPC90aXRsZT48ZyBpZD0i44Os44Kk44Ok44O8XzIiIGRhdGEtbmFtZT0i44Os44Kk44Ok44O8IDIiPjxnIGlkPSLjg6zjgqTjg6Tjg7xfMS0yIiBkYXRhLW5hbWU9IuODrOOCpOODpOODvCAxIj48cmVjdCBjbGFzcz0iY2xzLTEiIHdpZHRoPSIyMDAiIGhlaWdodD0iMTYwIi8+PHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNjUuMzEsNzIuMjZoOS41djIuNTdoLTYuNHYzLjU4aDUuNDRWODFINjguNDF2NC4xNEg3NXYyLjU5SDY1LjMxWiIvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTg2LjYsODcuNzRsLTMuMTgtNS44Nkg4MS4yN3Y1Ljg2aC0zLjFWNzIuMjZoNS40YzMuMjQsMCw1LjgyLDEuMTMsNS44Miw0LjY5YTQuNDMsNC40MywwLDAsMS0yLjk1LDQuNDZsMy42Miw2LjM0Wm0tNS4zMy04LjNoMmMyLDAsMy4wOC0uODQsMy4wOC0yLjQ5cy0xLjA5LTIuMjQtMy4wOC0yLjI0aC0yWiIvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTEwMC44Nyw4Ny43NGwtMy4xOC01Ljg2SDk1LjUzdjUuODZoLTMuMVY3Mi4yNmg1LjRjMy4yNCwwLDUuODIsMS4xMyw1LjgyLDQuNjlhNC40Myw0LjQzLDAsMCwxLTIuOTUsNC40NmwzLjYyLDYuMzRabS01LjMzLTguM2gyYzIsMCwzLjA4LS44NCwzLjA4LTIuNDlzLTEuMDktMi4yNC0zLjA4LTIuMjRoLTJaIi8+PHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTA1LjkzLDc5Ljk0YzAtNSwyLjgyLTgsNi45Mi04czYuOTIsMi45NSw2LjkyLDhTMTE3LDg4LDExMi44NSw4OCwxMDUuOTMsODUsMTA1LjkzLDc5Ljk0Wm0xMC42OSwwYzAtMy4zMy0xLjQ2LTUuMzEtMy43Ny01LjMxcy0zLjc3LDItMy43Nyw1LjMxLDEuNDYsNS40MiwzLjc3LDUuNDJTMTE2LjYyLDgzLjI0LDExNi42Miw3OS45NFoiLz48cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xMzEuMjQsODcuNzRsLTMuMTgtNS44NkgxMjUuOXY1Ljg2aC0zLjFWNzIuMjZoNS40YzMuMjQsMCw1LjgyLDEuMTMsNS44Miw0LjY5YTQuNDMsNC40MywwLDAsMS0yLjk1LDQuNDZsMy42Miw2LjM0Wm0tNS4zMy04LjNoMmMyLDAsMy4wOC0uODQsMy4wOC0yLjQ5cy0xLjA5LTIuMjQtMy4wOC0yLjI0aC0yWiIvPjwvZz48L2c+PC9zdmc+';
-                }
+                };
+
                 setTimeout(function() {
                     if(picture.thumbnail == null && !picture.error){
                         console.error('[createThumbnail] Timeout to load ' + picture.filename);
@@ -347,7 +337,7 @@
                 }, this.thumbnail.timeout);
 
                 img.onload = () => {
-                    var dx, dy, dw, dh;
+                    var dx, dy, dw, dh, thumbnail;
                     canvas = document.createElement("canvas");
                     ctx = canvas.getContext("2d");
                     canvas.width = this.thumbnail.size.width;
@@ -357,11 +347,11 @@
                     dx = (canvas.width - dw) / 2;
                     dy = (canvas.height - dh) / 2;
                     ctx.drawImage(img, dx, dy, dw, dh);
-                    picture.thumbnail = canvas.toDataURL("image/png");
-                    if(callback != null) return callback();
+                    thumbnail = canvas.toDataURL("image/png");
+                    if(callback != null) return callback(thumbnail);
                 };
                 return img.src = picture.storage_path;
-            },
+            },*/
         },
         components:{
             'uploader': UploaderComponent
