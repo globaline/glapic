@@ -33,6 +33,21 @@ class AlbumController extends Controller
 
     public function store(Request $request)
     {
-        $this->album->fill($request->all())->save();
+        $album = $request->only(['id', 'name', 'category_id']);
+        $this->album->fill($album)->save();
+    }
+
+    public function update(Request $request, $id)
+    {
+        $album = $request->only(['id', 'name', 'category_id']);
+        $this->album->find($id)->fill($album)->save();
+    }
+
+    public function destroy($id)
+    {
+        $album = $this->album->find($id);
+        \File::deleteDirectory(storage_path().'/images/'.$album->category->name.'/'.$album->name);
+        \Debugbar::info(storage_path().'/images/'.$album->category->name.'/'.$album->name);
+        $album->delete();
     }
 }

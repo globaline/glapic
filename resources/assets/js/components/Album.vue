@@ -8,6 +8,10 @@
                         {{ trans('home.albums') }}<span v-if="albumSelected"> - {{ current.name }}</span>
                     </div>
                     <div class="col-xs-4 text-right">
+                        <button class="btn btn-default btn-ghost btn-xs" @click.stop="edit();" :disabled="!categorySelected">
+                            <template v-if="editMode">完了</template>
+                            <template v-else>{{ trans('home.edit') }}</template>
+                        </button>
                         <button type="button" class="btn btn-xs btn-default btn-ghost visible-lg-inline-block" :class="{active: fixed}" name="fixed_panel"
                                 @click.stop="fixedPanel">
                             <i class="glyphicon glyphicon-pushpin"></i>
@@ -25,10 +29,28 @@
                         {{ trans('home.no_album') }}
                     </div>
     　              <template v-else>
-                    <div v-for="(album, index) in albums" class="col-xs-6 col-sm-4 col-md-2">
+                    <div v-for="(album, index) in albums" class="col-xs-6 col-sm-4 col-lg-3">
                         <div v-if="editMode" class="thumbnail">
                             <img v-if="!!thumbnails[index]" :src="thumbnails[index]" :alt="album.name">
-                            <input class="form-control" type="text" v-model="album.name">
+                            <div class="input-group">
+                                <input class="form-control" type="text" v-model="albums_local[index].name" :readonly="!albums_local[index].editable">
+                                <span v-if="!albums_local[index].editable" class="input-group-btn">
+                                    <button class="btn btn-primary" type="button" @click="editName(index)">
+                                        <i class="glyphicon glyphicon-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-danger" type="button" @click="confirmDestroy(index)">
+                                        <i class="glyphicon glyphicon-trash"></i>
+                                    </button>
+                                </span>
+                                <span v-else class="input-group-btn">
+                                    <button class="btn btn-success" type="button" @click="update(index)">
+                                        <i class="glyphicon glyphicon-ok"></i>
+                                    </button>
+                                    <button class="btn btn-danger" type="button" @click="cancel(index)">
+                                        <i class="glyphicon glyphicon-remove"></i>
+                                    </button>
+                                </span>
+                            </div>
                         </div>
                         <a v-else class="thumbnail" :class="{ active: isCurrent(album.id) }"
                            @click="setAlbum(index)" style="cursor: pointer">
@@ -40,12 +62,6 @@
                     </div>
                     </template>
                 </div>
-            </div>
-            <div class="panel-footer text-right" v-if="expand">
-                <button class="btn btn-default btn-ghost btn-sm" @click="edit();">
-                    <template v-if="editMode">完了</template>
-                    <template v-else>{{ trans('home.edit') }}</template>
-                </button>
             </div>
         </div>
         <modal id="createModal" title="アルバムの新規作成" ref="createModal"
@@ -60,19 +76,33 @@
                 </div>
             </div>
         </modal>
+        <modal id="removeModal" title="削除確認" ref="removeModal"
+               @ok="destroy(modal.delete.index)" :okHide="true" okColor="danger" :okText="trans('home.delete')"
+               :cancelText="trans('home.cancel')">
+            <div class="row">
+                <div class="col-md-12">
+                    <p>アルバム"{{ modal.delete.album.name }}"を削除してもよろしいですか？</p>
+                </div>
+            </div>
+        </modal>
     </div>
 </template>
 
 <script>
-    import { SET_ALBUM, FETCH_ALBUMS, STORE_ALBUM } from '../vuex/mutation-types';
+    import { SET_ALBUM, FETCH_ALBUMS, STORE_ALBUM, UPDATE_ALBUM, DESTROY_ALBUM } from '../vuex/mutation-types';
 
     export default {
         data() {
             return {
+                albums_local: [],
                 modal: {
                     create: {
                         name: "",
                         category_id: null,
+                    },
+                    delete: {
+                        index: null,
+                        album: {}
                     }
                 },
                 expand: true,
@@ -102,8 +132,9 @@
         },
         watch: {
             category() {
-                this.fetchAlbums();
+                this.editMode = false;
                 this.setAlbum(null);
+                this.fetchAlbums();
                 this.expandWindow(true);
             },
             expand() {
@@ -121,8 +152,44 @@
                 this.$store.dispatch(SET_ALBUM, index);
                 this.expandWindow(false);
             },
+            loadingEditor() {
+                let albums = [];
+                this.albums.map((album, index) => {
+                    albums[index] = Object.assign({'editable': false}, album);
+                });
+                this.$set(this, 'albums_local', albums);
+            },
             edit() {
+                if(!this.editMode) this.loadingEditor();
                 this.editMode = !this.editMode;
+            },
+            editName(index) {
+                this.albums_local[index].editable = true;
+            },
+            update(index) {
+                let album = Object.assign({}, this.albums_local[index]);
+                this.$store.dispatch(UPDATE_ALBUM, album, index)
+                    .then(() => {
+                        this.albums_local[index].editable = false;
+                    });
+            },
+            cancel(index) {
+                this.albums_local[index].name = this.$store.state.album.items[index].name;
+                this.albums_local[index].editable = false;
+            },
+            confirmDestroy(index) {
+                this.$set(this.modal, 'delete', {
+                    index: index,
+                    album: Object.assign({}, this.albums_local[index])
+                });
+                this.$refs.removeModal.show();
+            },
+            destroy(index) {
+                this.$store.dispatch(DESTROY_ALBUM, index)
+                    .then(() => {
+                        // TODO: 反映されない
+                        this.loadingEditor();
+                    });
             },
             create() {
                 this.modal.create = {
@@ -132,10 +199,6 @@
                 this.$refs.createModal.show();
             },
             store() {
-                /*this.$http.post('api/album', this.modal.create)
-                .then(response => {
-                    this.fetchAlbums();
-                });*/
                 this.$store.dispatch(STORE_ALBUM, this.modal.create);
             },
             isCurrent(id) {

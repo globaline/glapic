@@ -1,5 +1,7 @@
 export const SET_ALBUM = 'SET_ALBUM';
 export const STORE_ALBUM = 'STORE_ALBUM';
+export const UPDATE_ALBUM = 'UPDATE_ALBUM';
+export const DESTROY_ALBUM = 'DESTROY_ALBUM';
 export const FETCH_ALBUMS = 'FETCH_ALBUMS';
 export const SET_ALBUM_THUMBNAILS = 'SET_ALBUM_THUMBNAILS';
 

@@ -21,11 +21,12 @@ export default {
     },
     actions : {
         [FETCH_PICTURES]({ commit, getters }) {
-            if (!Object.keys(getters.currentAlbum).length) return;
-            vm.$http.get('api/picture?album=' + getters.currentAlbum.id)
+            if (!Object.keys(getters.currentAlbum).length) return commit(FETCH_PICTURES, []);
+            else vm.$http.get('api/picture?album=' + getters.currentAlbum.id)
                 .then(response => {
                     let pictures = JSON.parse(response.data);
                     if (Object.keys(pictures).length) commit(SET_PICTURE_LOADER, true);
+                    else return commit(FETCH_PICTURES, []);
                     tg.setPictures(pictures);
                     tg.generate()
                         .then((thumbnails) => {

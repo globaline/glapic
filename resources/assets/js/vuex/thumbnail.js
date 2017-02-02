@@ -9,7 +9,7 @@ export default class {
         this.pictures = [];
 
         this.settings = {
-            timeout: 10000,
+            timeout: 3000,
             size: {
                 width: 200,
                 height: 160
@@ -21,7 +21,7 @@ export default class {
     setPictures (pictures, key) {
         if (isset(key)) {
             pictures.map((picture, index) => {
-                this.pictures[index] = pictures[index][key];
+                this.pictures[index] = picture[key];
             });
         }
         else this.pictures = pictures;
@@ -47,7 +47,7 @@ export default class {
 
 
             pictures.map((picture, index) => {
-                this.create(pictures[index] , (thumbnail) => {
+                this.create(picture , (thumbnail) => {
                     thumbnails[index] = thumbnail;
                     setCount++;
                     if (setCount == pictures.length && thisQueue.isCurrent) {
@@ -99,23 +99,17 @@ export default class {
 
 function isset ()
 {
-    var a = arguments,
-        l = a.length,
-        i = 0,
-        undef;
+    let a = arguments;
+    let l = a.length;
+    let i = 0;
+    let undef;
 
-    if (l === 0)
-    {
-        throw new Error('Empty isset');
-    }
+    if (l === 0) throw new Error('Empty isset');
 
-    while (i !== l)
-    {
-        if (a[i] === undef || a[i] === null)
-        {
-            return false;
-        }
+    while (i !== l) {
+        if (a[i] === undef || a[i] === null) return false;
         i++;
     }
+
     return true;
 }
