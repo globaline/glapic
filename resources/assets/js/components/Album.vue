@@ -13,7 +13,7 @@
                             <i class="glyphicon glyphicon-pushpin"></i>
                         </button>
                         <button type="button" class="btn btn-xs btn-default btn-ghost" name="add_album"
-                                @click.stop="newAlbum" :disabled="!categorySelected">
+                                @click.stop="create" :disabled="!categorySelected">
                             <i class="glyphicon glyphicon-plus"></i>
                         </button>
                     </div>
@@ -26,13 +26,13 @@
                     </div>
     　              <template v-else>
                     <div v-for="(album, index) in albums" class="col-xs-6 col-sm-4 col-md-2">
-                        <div v-if="edit" class="thumbnail">
-                            <img v-if="!!album.thumbnail" :src="album.thumbnail" :alt="album.name">
+                        <div v-if="editMode" class="thumbnail">
+                            <img v-if="!!thumbnails[index]" :src="thumbnails[index]" :alt="album.name">
                             <input class="form-control" type="text" v-model="album.name">
                         </div>
                         <a v-else class="thumbnail" :class="{ active: isCurrent(album.id) }"
                            @click="setAlbum(index)" style="cursor: pointer">
-                            <img v-if="!!album.thumbnail" :src="album.thumbnail" :alt="album.name">
+                            <img v-if="!!thumbnails[index]" :src="thumbnails[index]" :alt="album.name">
                             <div class="caption">
                                 <p>{{ album.name }}</p>
                             </div>
@@ -42,20 +42,20 @@
                 </div>
             </div>
             <div class="panel-footer text-right" v-if="expand">
-                <button class="btn btn-default btn-ghost btn-sm" @click="toggleEditMode();">
-                    <template v-if="edit">完了</template>
+                <button class="btn btn-default btn-ghost btn-sm" @click="edit();">
+                    <template v-if="editMode">完了</template>
                     <template v-else>{{ trans('home.edit') }}</template>
                 </button>
             </div>
         </div>
-        <modal id="addNewAlbumModal" title="アルバムの新規作成" ref="addNewAlbumModal"
+        <modal id="createModal" title="アルバムの新規作成" ref="createModal"
                @ok="store()" :okHide="true" okColor="primary" :okText="trans('home.add')"
                :cancelText="trans('home.cancel')">
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
                         <label>アルバム名</label>
-                        <input type="text" class="form-control" v-model="modal.add.name">
+                        <input type="text" class="form-control" v-model="modal.create.name">
                     </div>
                 </div>
             </div>
@@ -64,25 +64,28 @@
 </template>
 
 <script>
-    import { SET_ALBUM, FETCH_ALBUMS } from '../vuex/mutation-types';
+    import { SET_ALBUM, FETCH_ALBUMS, STORE_ALBUM } from '../vuex/mutation-types';
 
     export default {
         data() {
             return {
                 modal: {
-                    add: {
+                    create: {
                         name: "",
                         category_id: null,
                     }
                 },
                 expand: true,
                 fixed: false,
-                edit: false,
+                editMode: false,
             }
         },
         computed: {
             albums() {
                 return this.$store.state.album.items;
+            },
+            thumbnails() {
+                return this.$store.state.album.thumbnails;
             },
             current() {
                 return this.$store.getters.currentAlbum;
@@ -118,21 +121,25 @@
                 this.$store.dispatch(SET_ALBUM, index);
                 this.expandWindow(false);
             },
-            isCurrent(id) {
-                return this.current.id == id;
+            edit() {
+                this.editMode = !this.editMode;
             },
-            newAlbum() {
-                this.modal.add = {
+            create() {
+                this.modal.create = {
                         name: "",
                         category_id: this.category.id,
                 };
-                this.$refs.addNewAlbumModal.show();
+                this.$refs.createModal.show();
             },
             store() {
-                this.$http.post('api/album', this.modal.add)
+                /*this.$http.post('api/album', this.modal.create)
                 .then(response => {
                     this.fetchAlbums();
-                });
+                });*/
+                this.$store.dispatch(STORE_ALBUM, this.modal.create);
+            },
+            isCurrent(id) {
+                return this.current.id == id;
             },
             expandWindow(expand) {
                 this.expand = expand;
@@ -144,9 +151,6 @@
                 this.fixed = !this.fixed;
                 if(this.fixed) this.expand = true;
             },
-            toggleEditMode() {
-                this.edit = !this.edit;
-            }
         }
     }
 </script>

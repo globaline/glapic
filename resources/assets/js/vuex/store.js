@@ -7,6 +7,7 @@ import Picture from './picture';
 Vue.use(Vuex);
 
 
+
 const modules = {
     category: Category,
     album: Album,
