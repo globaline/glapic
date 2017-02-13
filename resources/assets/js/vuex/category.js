@@ -22,7 +22,7 @@ export default {
         },
         [FETCH_CATEGORIES]({ commit }) {
             vm.$http.get('api/category')
-                .then(response => commit(FETCH_CATEGORIES, JSON.parse(response.data)))
+                .then(response => commit(FETCH_CATEGORIES, response.data))
                 .catch(error => console.error(error));
         },
     },

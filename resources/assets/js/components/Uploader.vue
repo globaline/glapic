@@ -13,8 +13,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <drop-zone url="/api/picture" id="dropzone" ref="uploadDropzone" :showRemoveLink="true" :maxNumberOfFiles="50" :maxFileSizeInMB="4"
-                               :autoProcessQueue="false" @vdropzone-success="nextUpload" @vdropzone-fileAdded="addFile"></drop-zone>
+                    <drop-zone url="/api/picture" id="dropzone" ref="uploadDropzone" :showRemoveLink="true" :maxNumberOfFiles="50" :maxFileSizeInMB="16"
+                               :autoProcessQueue="false" @vdropzone-success="nextUpload" @vdropzone-file-added="addFile"></drop-zone>
                 </div>
             </div>
         </div>
@@ -42,6 +42,9 @@
         },
         methods: {
             show() {
+                this.message = "";
+                this.files = {},
+                this.numberOfUploaded = 0;
                 $('#uploadModal').modal('show');
             },
             request(file, xhr, formData) {

@@ -1,5 +1,5 @@
-import Vuex from 'vuex';
 import Vue from 'vue';
+import Vuex from 'vuex';
 import Category from './category';
 import Album from './album';
 import Picture from './picture';

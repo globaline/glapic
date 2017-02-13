@@ -31,7 +31,7 @@
     　              <template v-else>
                     <div v-for="(album, index) in albums" class="col-xs-6 col-sm-4 col-lg-3">
                         <div v-if="editMode" class="thumbnail">
-                            <img v-if="!!thumbnails[index]" :src="thumbnails[index]" :alt="album.name">
+                            <img v-if="!!album.thumbnail_path" :src="album.thumbnail_path" :alt="album.name">
                             <div class="input-group">
                                 <input class="form-control" type="text" v-model="albums_local[index].name" :readonly="!albums_local[index].editable">
                                 <span v-if="!albums_local[index].editable" class="input-group-btn">
@@ -54,7 +54,7 @@
                         </div>
                         <a v-else class="thumbnail" :class="{ active: isCurrent(album.id) }"
                            @click="setAlbum(index)" style="cursor: pointer">
-                            <img v-if="!!thumbnails[index]" :src="thumbnails[index]" :alt="album.name">
+                            <img v-if="!!album.thumbnail_path" :src="album.thumbnail_path" :alt="album.name">
                             <div class="caption">
                                 <p>{{ album.name }}</p>
                             </div>
@@ -113,9 +113,6 @@
         computed: {
             albums() {
                 return this.$store.state.album.items;
-            },
-            thumbnails() {
-                return this.$store.state.album.thumbnails;
             },
             current() {
                 return this.$store.getters.currentAlbum;

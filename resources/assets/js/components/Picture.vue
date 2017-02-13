@@ -23,7 +23,7 @@
                     <template v-else>
                         <div v-for="(picture, index) in pictures" class="col-xs-12 col-sm-6 col-md-3" style="cursor: pointer" @click="show(index)">
                             <div class="thumbnail">
-                                <img v-if="!!thumbnails[index]" :src="thumbnails[index]" :alt="picture.filename">
+                                <img v-if="!!picture.thumbnail_path" :src="picture.thumbnail_path" :alt="picture.filename">
                                 <div class="caption">
                                     <p>{{ picture.filename }}</p>
                                     <div class="btn-group btn-group-justified" role="group" :aria-label="picture.id">

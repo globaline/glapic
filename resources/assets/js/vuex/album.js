@@ -1,22 +1,13 @@
 import Vuex from 'vuex';
 import Vue from 'vue';
 import { SET_ALBUM, FETCH_ALBUMS, SET_ALBUM_THUMBNAILS, STORE_ALBUM, UPDATE_ALBUM, DESTROY_ALBUM } from './mutation-types';
-import thumbnailGenerator from './thumbnail';
 
 Vue.use(Vuex);
 
 const vm = new Vue;
-const tg = new thumbnailGenerator({
-    size: {
-        width: 348,
-        height: 261
-    }
-});
-
 export default {
     state: {
         current: null,
-        thumbnails: [],
         items: []
     },
     getters: {
@@ -50,14 +41,8 @@ export default {
             vm.$http.get('api/album?category=' + getters.currentCategory.id)
                 .then(response => {
                     if (!Object.keys(getters.currentCategory).length) return;
-                    let albums = JSON.parse(response.data);
-                    if (!Object.keys(albums).length) commit(FETCH_ALBUMS, []);
-                    tg.setPictures(albums, 'thumbnail');
-                    tg.generate()
-                        .then(thumbnails => {
-                            commit(SET_ALBUM_THUMBNAILS, thumbnails);
-                            commit(FETCH_ALBUMS, albums)
-                        });
+                    let albums = response.data;
+                    commit(FETCH_ALBUMS, albums)
                 })
                 .catch(error => console.error(error));
         },

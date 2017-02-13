@@ -25,9 +25,21 @@ Route::post('register', 'Auth\RegisterController@register');
 
 Route::resource('/', 'HomeController');
 
-Route::get('images/{category}/{album}/{filename}', function ($category, $album, $filename)
+Route::get('images/{filename}', function ($filename)
 {
-    $path = implode('/', [storage_path(), 'images', $category, $album, $filename]);
+    $path = implode('/', [storage_path(), 'images', $filename]);
+
+    if(!File::exists($path)) abort(404);
+    $type = File::mimeType($path);
+
+    $response = Response::file($path, ["Content-Type" => $type]);
+
+    return $response;
+});
+
+Route::get('thumbnails/{filename}', function ($filename)
+{
+    $path = implode('/', [storage_path(), 'thumbnails', $filename]);
 
     if(!File::exists($path)) abort(404);
     $type = File::mimeType($path);

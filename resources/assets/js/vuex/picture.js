@@ -1,17 +1,10 @@
 import Vuex from 'vuex';
 import Vue from 'vue';
 import { FETCH_PICTURES, SET_PICTURE_THUMBNAILS, SET_PICTURE_LOADER } from './mutation-types';
-import thumbnailGenerator from './thumbnail';
 
 Vue.use(Vuex);
 
 const vm = new Vue;
-const tg = new thumbnailGenerator({
-    size: {
-        width: 678,
-        height: 542
-    }
-});
 
 export default {
     state : {
@@ -24,17 +17,10 @@ export default {
             if (!Object.keys(getters.currentAlbum).length) return commit(FETCH_PICTURES, []);
             else vm.$http.get('api/picture?album=' + getters.currentAlbum.id)
                 .then(response => {
-                    let pictures = JSON.parse(response.data);
-                    if (Object.keys(pictures).length) commit(SET_PICTURE_LOADER, true);
-                    else return commit(FETCH_PICTURES, []);
-                    tg.setPictures(pictures);
-                    tg.generate()
-                        .then((thumbnails) => {
-                            commit(SET_PICTURE_THUMBNAILS, thumbnails);
-                            commit(FETCH_PICTURES, pictures);
-                            commit(SET_PICTURE_LOADER, false);
-                        })
-                        .catch(error => console.error(error))
+                    let pictures = response.data;
+                    commit(SET_PICTURE_LOADER, true);
+                    commit(FETCH_PICTURES, pictures);
+                    commit(SET_PICTURE_LOADER, false);
                 })
                 .catch(error => console.error(error));
         },

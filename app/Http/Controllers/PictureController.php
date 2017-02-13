@@ -20,23 +20,31 @@ class PictureController extends Controller
     {
         $files = $request->allFiles('file');
         $album_id = $request->get('album');
-        $category_id = Album::find($album_id)->category_id;
         $uploadcount = 0;
         foreach($files as $file) {
             $rules = array('file' => 'required'); //'required|mimes:png,gif,jpeg,txt,pdf,doc'
             $validator = \Validator::make(array('file'=> $file), $rules);
             if($validator->passes()){
-                $destinationPath = 'uploads';
                 $filename = $file->getClientOriginalName();
-                $category = Category::find($category_id)->name;
-                $album = Album::find($album_id)->name;
-                $upload_success = $file->move(storage_path().'/images/'.$category.'/'.$album, $filename);
 
-                Picture::create([
+                $picture = Picture::create([
                     'filename' => $filename,
-                    'storage_path' => '/images/'.$category.'/'.$album.'/'.$filename,
                     'album_id' => $album_id,
                 ]);
+
+
+                $storage_path = '/images/'.$picture->id.'.jpg';
+                $thumbnail_path = '/thumbnails/'.$picture->id.'.jpg';
+
+                $file->move(storage_path().'/images/', $picture->id.'.jpg');
+                \Image::make(storage_path().$storage_path)->fit(342, 273)
+                    ->save(storage_path().$thumbnail_path);
+
+                $picture->storage_path = $storage_path;
+                $picture->thumbnail_path = $thumbnail_path;
+
+                $picture->save();
+
                 $uploadcount ++;
             }
         }
